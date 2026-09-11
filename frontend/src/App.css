@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* 
+  Dark mode: Tailwind v4 uses @custom-variant.
+  When <html> has class="dark", all dark: utilities activate.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Ensure html/body take the correct background in both modes */
+html {
+  background-color: white;
+  color: #111827;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+html.dark {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+/* Smooth theme transitions across all elements */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+/* Remove transition from animated elements to prevent jank */
+.animate-spin, [class*="animate-"] {
+  transition: none !important;
+}
