@@ -2,7 +2,6 @@
 
 A premium AI-driven recruitment platform built on the MERN stack (MongoDB, Express.js, React.js, Node.js). This application connects job seekers with employers using advanced AI features powered by NVIDIA NIM for resume analysis, job matching, skill gap identification, and interview preparation.
 
-*Originally forked from [exclusiveabhi/react-job-portal](https://github.com/exclusiveabhi/react-job-portal), MIT-licensed.*
 
 ## Features
 
