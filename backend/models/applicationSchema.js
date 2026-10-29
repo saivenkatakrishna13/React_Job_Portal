@@ -87,7 +87,23 @@ const applicationSchema = new mongoose.Schema({
   },
   aiExplanation: {
     type: String,
+  },
+  // Background AI scoring lifecycle (Part C Phase 4): set to "pending" at
+  // creation when scoring can run, then "done"/"failed" by the background
+  // task; "skipped" when there is no resume text/analysis to score against.
+  aiStatus: {
+    type: String,
+    enum: ["pending", "done", "failed", "skipped"],
+    default: "skipped",
   }
-});
+}, { timestamps: true });
+
+// One application per candidate per job — enforced at the database level
+// (Part A #10). The controller check keeps the exact "You have already applied
+// to this job." message; this index catches races and direct writes.
+applicationSchema.index(
+  { jobId: 1, "applicantID.user": 1 },
+  { unique: true, name: "job_applicant_unique" }
+);
 
 export const Application = mongoose.model("Application", applicationSchema);

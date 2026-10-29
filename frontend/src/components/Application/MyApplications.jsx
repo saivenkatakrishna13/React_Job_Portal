@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { fadeIn, staggerContainer } from "../../utils/animations";
 
 const MyApplications = () => {
-  const { user } = useContext(Context);
+  const { user, authLoading } = useContext(Context);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -21,6 +21,9 @@ const MyApplications = () => {
   const targetJobId = searchParams.get("jobId");
 
   useEffect(() => {
+    // Wait until the auth check has resolved AND we know the visitor's role,
+    // otherwise an Employer on refresh hits the Job Seeker endpoint (400).
+    if (authLoading || !user?.role) return;
     const fetchApplications = async () => {
       setLoading(true);
       try {
@@ -43,7 +46,7 @@ const MyApplications = () => {
       }
     };
     fetchApplications();
-  }, [isAuthorized, user, targetJobId]);
+  }, [isAuthorized, user, authLoading, targetJobId]);
 
   const deleteApplication = async (id) => {
     try {
@@ -195,7 +198,7 @@ const JobSeekerCard = ({ element, deleteApplication, openModal }) => {
           <h3 className="text-xl font-bold text-gray-900 dark:text-white">{element.jobId?.title || element.name}</h3>
         </div>
         
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Applied on {new Date(element.createdAt || Date.now()).toLocaleDateString()}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Applied on {new Date(element.createdAt || parseInt(String(element._id).slice(0, 8), 16) * 1000).toLocaleDateString()}</p>
         
         {/* Tracking Timeline */}
         <div className="mb-8">

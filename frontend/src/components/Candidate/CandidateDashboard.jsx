@@ -75,7 +75,7 @@ const CandidateDashboard = () => {
       try {
         const [appsRes, jobsRes] = await Promise.all([
           api.get("/application/jobseeker/getall"),
-          api.get("/job/getall"),
+          api.get("/job/getall?limit=100"),
         ]);
 
         const apps = appsRes.data.applications || [];
@@ -126,7 +126,7 @@ const CandidateDashboard = () => {
       });
       toast.success("Resume uploaded! Running AI analysis...");
 
-      // Step 2: NVIDIA NIM analyzes resumeText
+      // Step 2: Groq analyzes resumeText
       const aiRes = await api.post("/ai/analyze-resume");
       const freshAnalysis = aiRes.data.analysis;
       setAnalysis(freshAnalysis);
@@ -140,7 +140,7 @@ const CandidateDashboard = () => {
       if (fileInputRef.current) fileInputRef.current.value = "";
 
       // Step 4: Re-score jobs with new skills
-      const jobsRes = await api.get("/job/getall");
+      const jobsRes = await api.get("/job/getall?limit=100");
       const allJobs = jobsRes.data.jobs || [];
       const skills = freshAnalysis?.technicalSkills || [];
       if (skills.length > 0) {
@@ -267,7 +267,7 @@ const CandidateDashboard = () => {
                       <>
                         <Loader2 className="mx-auto h-12 w-12 text-blue-500 animate-spin mb-4" />
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                          NVIDIA NIM is analyzing your resume...
+                          Groq is analyzing your resume...
                         </h3>
                         <p className="text-gray-500 dark:text-gray-400 mb-2 max-w-sm mx-auto text-sm">
                           Extracting skills, scoring experience, computing job compatibility.
@@ -281,7 +281,7 @@ const CandidateDashboard = () => {
                           Upload your resume for AI insights
                         </h3>
                         <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto text-sm">
-                          Get a score, extract your skills, and let NVIDIA NIM match you with perfect jobs.
+                          Get a score, extract your skills, and let Groq match you with perfect jobs.
                         </p>
                         <div className="flex flex-col items-center max-w-xs mx-auto gap-3">
                           <input

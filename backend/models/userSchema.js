@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter your Email!"],
     validate: [validator.isEmail, "Please provide a valid Email!"],
+    // DB-level uniqueness backstop (the controller check keeps the exact
+    // "Email already registered !" message; this catches races).
+    unique: true,
   },
   phone: {
     type: Number,
@@ -50,7 +53,7 @@ const userSchema = new mongoose.Schema({
 //ENCRYPTING THE PASSWORD WHEN THE USER REGISTERS OR MODIFIES HIS PASSWORD
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
-    next();
+    return next();
   }
   this.password = await bcrypt.hash(this.password, 10);
 });

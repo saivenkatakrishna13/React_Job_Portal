@@ -16,5 +16,13 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    // These two rules fire on almost every file in this codebase (no PropTypes
+    // declarations, unused React imports); turning them into guidance keeps
+    // lint able to surface real errors.
+    'react/prop-types': 'off',
+    'no-unused-vars': 'warn',
+    // Apostrophes/quotes in copy ("Don't have an account?") are intentional;
+    // escaping them would only churn the JSX text.
+    'react/no-unescaped-entities': 'off',
   },
 }

@@ -53,6 +53,11 @@ const jobSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  // Optional application deadline (Part A #11): jobs past it behave as
+  // expired in queries; documents without a deadline stay open forever.
+  deadline: {
+    type: Date,
+  },
   postedBy: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
@@ -73,5 +78,11 @@ const jobSchema = new mongoose.Schema({
     default: "Entry",
   },
 });
+
+// Indexes (Part A #10): full-text search capability, the hot list query
+// (getall filters on expired + sorts by jobPostedOn) and ownership lookups.
+jobSchema.index({ title: "text", description: "text", requiredSkills: "text" });
+jobSchema.index({ expired: 1, jobPostedOn: -1 });
+jobSchema.index({ postedBy: 1 });
 
 export const Job = mongoose.model("Job", jobSchema);

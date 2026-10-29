@@ -28,16 +28,25 @@ export const errorMiddleware = (err, req, res, next) => {
     err = new ErrorHandler(message, 400);
   }
 
+  // Handle Mongoose validation errors (field-level messages joined)
+  if (err.name === "ValidationError") {
+    const message =
+      Object.values(err.errors || {})
+        .map((e) => e.message)
+        .join(", ") || err.message;
+    err = new ErrorHandler(message, 400);
+  }
+
   // Handle invalid JWT
   if (err.name === "JsonWebTokenError") {
     const message = `Json Web Token is invalid, Try again please!`;
-    err = new ErrorHandler(message, 400);
+    err = new ErrorHandler(message, 401);
   }
 
   // Handle expired JWT
   if (err.name === "TokenExpiredError") {
     const message = `Json Web Token is expired, Try again please!`;
-    err = new ErrorHandler(message, 400);
+    err = new ErrorHandler(message, 401);
   }
 
   return res.status(err.statusCode).json({

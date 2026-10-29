@@ -53,7 +53,7 @@ const HowItWorks = () => {
               </div>
               <h3 className="mt-6 text-lg font-bold text-gray-900 dark:text-white">2. AI Analysis</h3>
               <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
-                NVIDIA NIM extracts your skills, assesses your experience level, and identifies your strengths.
+                Groq extracts your skills, assesses your experience level, and identifies your strengths.
               </p>
               {/* Connector line */}
               <div className="hidden md:block absolute top-10 left-[60%] w-full h-0.5 bg-gray-200 dark:bg-gray-800 -z-10"></div>

@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import api from "../../utils/api";
-import { Link, Navigate } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Context } from "../../main";
 import { Search, Filter, MapPin, DollarSign, Sparkles, Briefcase, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -10,13 +10,29 @@ const Jobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const { isAuthorized, user } = useContext(Context);
-  
+
+  // Landing-page hero (and category chips) link here with query params;
+  // seed the filters from the URL so those links actually filter the list.
+  const [searchParams] = useSearchParams();
+
   // Filter States
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
-  const [location, setLocation] = useState("");
-  const [jobType, setJobType] = useState("");
-  const [experienceLevel, setExperienceLevel] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [category, setCategory] = useState(searchParams.get("category") || "");
+  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [jobType, setJobType] = useState(searchParams.get("jobType") || "");
+  const [experienceLevel, setExperienceLevel] = useState(searchParams.get("experienceLevel") || "");
+
+  // Every distinct category present in the live job list. Keeps the dropdown
+  // in sync with real data instead of a hard-coded (and stale) option list.
+  const [allCategories, setAllCategories] = useState([]);
+
+  // Always offer the category we were deep-linked to, even if it isn't in the
+  // first page of results, so the select never silently resets to blank.
+  const categoryOptions = useMemo(() => {
+    const set = new Set(allCategories);
+    if (category) set.add(category);
+    return Array.from(set).sort();
+  }, [allCategories, category]);
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -28,7 +44,7 @@ const Jobs = () => {
       if (jobType) queryParams.append("jobType", jobType);
       if (experienceLevel) queryParams.append("experienceLevel", experienceLevel);
 
-      const res = await api.get(`/job/getall?${queryParams.toString()}`);
+      const res = await api.get(`/job/getall?limit=100&${queryParams.toString()}`);
       setJobs(res.data.jobs || []);
     } catch (error) {
       console.log(error);
@@ -36,6 +52,33 @@ const Jobs = () => {
       setLoading(false);
     }
   };
+
+  // Load the full category list once (independent of active filters) so the
+  // dropdown reflects every category an employer has actually posted.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.get("/job/getall?limit=1000");
+        if (cancelled) return;
+        const counts = {};
+        for (const job of res.data.jobs || []) {
+          if (!job.category) continue;
+          counts[job.category] = (counts[job.category] || 0) + 1;
+        }
+        setAllCategories(
+          Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name]) => name)
+        );
+      } catch (error) {
+        // Non-fatal: dropdown just stays empty / deep-link only.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     fetchJobs();
@@ -115,12 +158,9 @@ const Jobs = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
                   <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 border px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors">
                     <option value="">All Categories</option>
-                    <option value="Graphics & Design">Graphics & Design</option>
-                    <option value="Mobile App Development">Mobile App Development</option>
-                    <option value="Frontend Web Development">Frontend Web Development</option>
-                    <option value="MERN Stack Development">MERN Stack Development</option>
-                    <option value="Account & Finance">Account & Finance</option>
-                    <option value="Artificial Intelligence">Artificial Intelligence</option>
+                    {categoryOptions.map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
                   </select>
                 </div>
 

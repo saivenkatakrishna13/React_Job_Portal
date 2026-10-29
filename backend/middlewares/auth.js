@@ -12,5 +12,10 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 
   req.user = await User.findById(decoded.id);
 
+  // Valid token but the account no longer exists
+  if (!req.user) {
+    return next(new ErrorHandler("User Not Authorized", 401));
+  }
+
   next();
 });

@@ -24,6 +24,7 @@ const PostJob = () => {
   const [requiredSkills, setRequiredSkills] = useState("");
   const [jobType, setJobType] = useState("Full-time");
   const [experienceLevel, setExperienceLevel] = useState("Entry");
+  const [deadline, setDeadline] = useState(""); // optional application deadline
   const [submitting, setSubmitting] = useState(false);
 
   const { isAuthorized, user } = useContext(Context);
@@ -55,6 +56,13 @@ const PostJob = () => {
         requiredSkills: requiredSkills.split(",").map(s => s.trim()).filter(Boolean),
         jobType, experienceLevel,
       };
+
+      // Optional deadline: "YYYY-MM-DD" means "applications close at the end
+      // of that day" in the employer's timezone, stored as an absolute UTC
+      // instant. Jobs without one stay open forever.
+      if (deadline) {
+        payload.deadline = new Date(`${deadline}T23:59:59`).toISOString();
+      }
 
       if (salaryType === "Fixed Salary") {
         payload.fixedSalary = fixedSalary;
@@ -227,6 +235,20 @@ const PostJob = () => {
                 <option value="Senior">Senior Level</option>
                 <option value="Lead">Lead Level</option>
               </select>
+            </div>
+
+            <div className="sm:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Application Deadline (optional)</label>
+              <input
+                type="date"
+                value={deadline}
+                min={new Date().toISOString().slice(0, 10)}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white border px-4 py-2.5 focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Jobs past this date stop appearing in search results. Leave empty to keep the job open.
+              </p>
             </div>
 
             <div className="sm:col-span-2 border-t border-gray-200 dark:border-gray-700 pt-6 mt-2">
